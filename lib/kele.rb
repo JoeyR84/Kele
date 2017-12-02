@@ -20,8 +20,8 @@ class Kele
     }
 
     response    = self.class.post('/sessions', options)
-    @auth_token = response["auth_token"]
     puts response
+    @auth_token = response["auth_token"]
   end
 
   def get_me
@@ -30,8 +30,36 @@ class Kele
   end
 
   def get_mentor_availability(mentor_id)
-    response             = self.class.get('/mentors/2345139/student_availability', headers: { "authorization" => @auth_token })
+    response             = self.class.get("/mentors/#{mentor_id}/student_availability", headers: { "authorization" => @auth_token })
     @mentor_availability = JSON.parse(response.body)
   end
 
+  def get_messages(page)
+    response = self.class.get('/message_threads', headers: { "authorization" => @auth_token })
+    @message = JSON.parse(response.body)
+  end
+
+  def create_message(email, recipient_id, subject, message_body)
+    options = {
+        sender: email,
+        recipient_id: recipient_id,
+        subject: subject,
+        "stripped-text" => message_body
+    }
+
+    response = self.class.post('/messages', body: options, headers: { "authorization" => @auth_token})
+    @message = response["sent_message"]
+  end
+
+  def create_submission(checkpoint_id, assignment_branch, assignment_commit_link, comment)
+    options = {
+        checkpoint_id: checkpoint_id,
+        assignment_branch: assignment_branch,
+        assignment_commit_link: assignment_commit_link,
+        comment: comment
+    }
+
+    response = self.class.post('/checkpoint_submissions', body: options, headers: { "authorization" => @auth_token})
+    @submission = response["created submission"]
+  end
 end
